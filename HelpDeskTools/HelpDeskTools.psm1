@@ -12,25 +12,25 @@
     VERBOSE: Прерываем связь с компьютером HV-IT
     VERBOSE: Конец работы командлета
     PS C:\>
-
     Командлет выполнится на удаленном компьютере с именем HV-IT с выводом подробной информации.
 .INPUTS
     System.String
 .NOTES
-    Версия 0.1.1
-    25.11.2020
+
 #>
 function Reset-Spooler {
     [CmdletBinding()]
     param (
         # Имя компьютера или список имен компьютеров
         [Parameter(Mandatory = $true,
-            ValueFromPipeLine = $true)]
+            ValueFromPipeLine = $true,
+            Position = 0,
+            HelpMessage = "Введите одно или более имен компьютеров.")]
         [String[]]$ComputerName
     )
     
     begin {
-        Write-Verbose "Начало работы командлета"
+        Write-Verbose "Начало работы функции"
         Set-StrictMode –Version 2.0
     }
     
@@ -40,7 +40,8 @@ function Reset-Spooler {
         $ScriptBlock = {
             $ServiceName = 'Spooler'
             Stop-Service -Name $ServiceName
-            Remove-Item "C:\Windows\System32\spool\PRINTERS\*" -Recurse -Force
+            $SpoolerFolder = "$($(Get-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Print\Printers').DefaultSpoolDirectory)"
+            Remove-Item "$SpoolerFolder\*" -Recurse -Force
             Start-Service -Name $ServiceName 
         }
         
@@ -53,6 +54,6 @@ function Reset-Spooler {
     }
     
     end {
-        Write-Verbose "Конец работы командлета" 
+        Write-Verbose "Конец работы функции" 
     }
 }
